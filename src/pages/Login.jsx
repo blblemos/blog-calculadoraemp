@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {login} from "../config/api";
 import { useCookies } from 'react-cookie';
+import { AuthContext } from "../context/authContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -10,12 +11,14 @@ const Login = () => {
   const [err, setErr] = useState(null);
   const [cookies, setCookie] = useCookies(['access_token']);
   const navigate = useNavigate();
+  const { loginContext } = useContext(AuthContext);
   const handleSubmit = async (e) => {
     e.preventDefault();
     setBtnValue('Aguarde...');
     let sendLogin = await login(email, password); 
     if (sendLogin.log) {
       setCookie('access_token', sendLogin.content);
+      await loginContext();
       navigate('/');
     }else{
       setErr(sendLogin.content);

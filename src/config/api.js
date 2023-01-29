@@ -1,31 +1,46 @@
 import firebaseConfig from "../config/firebase";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile   } from "firebase/auth";
-import { getFirestore, collection, getDocs, getDoc , doc, query, where, addDoc} from "firebase/firestore";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
+  signOut
+} from "firebase/auth";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  getDoc,
+  doc,
+  query,
+  where,
+  addDoc,
+} from "firebase/firestore";
 const db = getFirestore(firebaseConfig);
 const get = async (userCollectionRef) => {
   const data = await getDocs(userCollectionRef);
-  return(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+  return data.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
 };
 //Recebe uma uma tabela e retorna todos os valores dela
-export function getAll(colecao){
+export function getAll(colecao) {
   const userCollectionRef = collection(db, colecao);
-  return(get(userCollectionRef));
+  return get(userCollectionRef);
 }
 //Busca elemento pelo id, recebedo a tabela de busca e o id
-export async function getById(table, id){
+export async function getById(table, id) {
   const docRef = doc(db, table, id);
   const docSnap = await getDoc(docRef);
   console.log(docSnap.data());
 }
 //Valida se o usuário ou email ja existem
-export async function validateUser(username, Email){
+export async function validateUser(username, Email) {
   var verify = false;
   const user = query(collection(db, "user"), where("username", "==", username));
   const email = query(collection(db, "user"), where("email", "==", Email));
   const querySnapshotUser = await getDocs(user);
   const querySnapshotEmail = await getDocs(email);
   querySnapshotUser.forEach(() => {
-    verify = true; 
+    verify = true;
   });
   querySnapshotEmail.forEach(() => {
     verify = true;
@@ -33,7 +48,7 @@ export async function validateUser(username, Email){
   return verify;
 }
 //Cadastrando novo usuário
-export async function newUser(username,email,password,img){
+export async function newUser(username, email, password, img) {
   var logNewUser = null;
   const auth = getAuth();
   await createUserWithEmailAndPassword(auth, email, password)
@@ -42,44 +57,44 @@ export async function newUser(username,email,password,img){
     })
     .catch((error) => {
       const errorCode = error.code;
-      if (errorCode == "auth/weak-password") {
+      if (errorCode === "auth/weak-password") {
         logNewUser = "A senha deve possuir no mínimo 6 dígitos";
-      }else if(errorCode == "auth/email-already-in-use"){
+      } else if (errorCode === "auth/email-already-in-use") {
         logNewUser = "Usuário ja cadastrado";
-      }else{
+      } else {
         logNewUser = errorCode;
       }
     });
-  
+
   await updateProfile(auth.currentUser, {
     displayName: username,
-    photoURL: img
-  }).then(() => {
-  }).catch((error) => {
-  });
-  
-  return logNewUser; 
+    photoURL: img,
+  })
+    .then(() => {})
+    .catch((error) => {});
+
+  return logNewUser;
 }
 //Login user
-export async function login(email, password){
+export async function login(email, password) {
   const auth = getAuth();
-  var logLogin = {log: false, content:''}; 
+  var logLogin = { log: false, content: "" };
   await signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
       const token = userCredential.user.accessToken;
-      logLogin.content= token;
+      logLogin.content = token;
       logLogin.log = true;
     })
     .catch((error) => {
-      const errorCode = error.code; 
-      if (errorCode == "auth/user-not-found") {
-        logLogin.content= 'Usuário não cadastrado';
-      }else if (errorCode == "auth/wrong-password"){
-        logLogin.content= 'Senha Incorreta';
+      const errorCode = error.code;
+      if (errorCode === "auth/user-not-found") {
+        logLogin.content = "Usuário não cadastrado";
+      } else if (errorCode === "auth/wrong-password") {
+        logLogin.content = "Senha Incorreta";
       }
     });
 
-    /*const user = auth.currentUser;
+  /*const user = auth.currentUser;
     if (user !== null) {
       const displayName = user.displayName; console.log(user);
       const email = user.email;
@@ -90,16 +105,43 @@ export async function login(email, password){
 
   return logLogin;
 }
+//Login user
+export async function logout() {
+  const auth = getAuth();
+  signOut(auth)
+    .then(() => {
+      alert("Sessão encerrada!");
+      window.location.reload(false);
+    })
+    .catch((error) => {
+      alert("Não foi possível deslogar");
+    });
+    return auth.currentUser;
+}
+//Retornar Dados Usuário
+export async function getUser() {
+  const auth = getAuth();
+  const user = auth.currentUser;
+  var userDate = {};
+  if (user !== null) {
+    userDate = {
+      displayName: user.displayName,
+      email: user.email,
+      photoURL: user.photoURL,
+      uid: user.uid,
+    };
+  }
+  return userDate;
+}
 //Cadastrando novo usuário
-export async function newPost(date,desc,img,title, uid) {
-  const userCollectionRef = collection(db, 'posts');
+export async function newPost(date, desc, img, title, uid) {
+  const userCollectionRef = collection(db, "posts");
   await addDoc(userCollectionRef, {
     date,
     desc,
     img,
     title,
-    uid
-  });  
-  return 'Post publicado'; 
-  
-};
+    uid,
+  });
+  return "Post publicado";
+}

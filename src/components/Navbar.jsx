@@ -1,6 +1,16 @@
+import { useContext } from "react";
 import { Link } from "react-router-dom";
 import Logo from "../img/logo.png";
+import { AuthContext } from "../context/authContext";
+import { useCookies } from 'react-cookie';
+import {getUser} from "../config/api";
 const Navbar = () => {
+  const { currentUser, logoutContext } = useContext(AuthContext);
+  const [cookies, setCookie, removeCookie] = useCookies(['access_token']);
+  const logout = async () => {
+    await logoutContext();
+    removeCookie('access_token');
+  }
   return (
     <div className="navbar">
       <div className="container">
@@ -17,14 +27,16 @@ const Navbar = () => {
           <Link className="link" to="/?cat=impostos">
             <h6>Impostos</h6>
           </Link>
-          <span>Bruno</span>
-          <span>Logout</span>
+          <span>{currentUser?.displayName}</span>
+          {currentUser && <span onClick={logout}>Logout</span>}
           <span className="write">
-            <Link className="link" to="/write">New</Link>
+            <Link className="link" to="/write">
+              New
+            </Link>
           </span>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 export default Navbar;
