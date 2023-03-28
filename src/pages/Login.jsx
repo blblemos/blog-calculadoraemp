@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {login} from "../config/api";
 import { useCookies } from 'react-cookie';
 import { AuthContext } from "../context/authContext";
@@ -38,7 +38,6 @@ const Login = () => {
         <span>  
           Não tem uma conta?
           <br />
-          <Link to="/register">Registrar</Link>
         </span>
       </form>
     </div>

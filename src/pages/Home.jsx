@@ -1,35 +1,39 @@
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { getAll, search } from "../config/api";
 const Home = () => {
-  const posts = [
-  {
-    id: 1,
-    title: "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-    desc: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A possimus excepturi aliquid nihil cumque ipsam facere aperiam at! Ea dolorem ratione sit debitis deserunt repellendus numquam ab vel perspiciatis corporis!",
-    img: "https://images.pexels.com/photos/7008010/pexels-photo-7008010.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  },
-  {
-    id: 2,
-    title: "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-    desc: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A possimus excepturi aliquid nihil cumque ipsam facere aperiam at! Ea dolorem ratione sit debitis deserunt repellendus numquam ab vel perspiciatis corporis!",
-    img: "https://images.pexels.com/photos/6489663/pexels-photo-6489663.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  },
-  {
-    id: 3,
-    title: "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-    desc: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A possimus excepturi aliquid nihil cumque ipsam facere aperiam at! Ea dolorem ratione sit debitis deserunt repellendus numquam ab vel perspiciatis corporis!",
-    img: "https://images.pexels.com/photos/4230630/pexels-photo-4230630.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  },
-  {
-    id: 4,
-    title: "Lorem ipsum dolor sit amet consectetur adipisicing elit",
-    desc: "Lorem, ipsum dolor sit amet consectetur adipisicing elit. A possimus excepturi aliquid nihil cumque ipsam facere aperiam at! Ea dolorem ratione sit debitis deserunt repellendus numquam ab vel perspiciatis corporis!",
-    img: "https://images.pexels.com/photos/6157049/pexels-photo-6157049.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-  },
-]
+  const [posts, setPosts] = useState([]);
+  const navigate = useNavigate();
+  const cat = useLocation().search;
+  useEffect(() => {
+    const fetchData = async () => {
+      let res;
+      try {
+        if (cat) {
+          res = await search('posts', 'cat', cat.replace('?',''));
+        }else{
+          res = await getAll("posts");
+        }
+      } catch (err) {
+        window.location.reload(false);
+      }
+      setPosts(res);
+    };
+    fetchData();
+  }, [cat]);
+
+  const getText = (html) =>{
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    var descricao_txt = doc.body.textContent;
+    if (descricao_txt.length > 500) {
+      descricao_txt = descricao_txt.substr(0,500)+"...";
+    }
+    return descricao_txt;
+  }
   return (
     <div className="home">
       <div className="posts">
-        {posts.map(post => (
+        {posts.map((post) => (
           <div className="post" key={post.id}>
             <div className="img">
               <img src={post.img} alt={post.title} />
@@ -38,15 +42,13 @@ const Home = () => {
               <Link className="link" to={`/post/${post.id}`}>
                 <h1>{post.title}</h1>
               </Link>
-              <p>{post.desc}</p>
-              <button>Ler Mais...</button>
+              <p>{getText(post.desc) }</p>
+              <Link className="link-btn" to={`/post/${post.id}`}>Ler Mais...</Link>
             </div>
           </div>
-        ))
-
-        }
+        ))}
       </div>
     </div>
-  )
-}
+  );
+};
 export default Home;

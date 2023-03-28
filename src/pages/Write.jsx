@@ -1,17 +1,109 @@
-import { useState } from 'react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import { useState, useContext, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import ReactQuill from "react-quill";
+import { editPost, newPost, uploadImg, deleteImg } from "../config/api";
+import "react-quill/dist/quill.snow.css";
+import { AuthContext } from "../context/authContext";
+import moment from "moment";
 const Write = () => {
-  const [value, setValue] = useState('');
+  const state = useLocation().state;
+  const navigate = useNavigate();
+  const [value, setValue] = useState("");
+  const [title, setTitle] = useState("");
+  const [img, setImg] = useState(null); 
+  const [imgUrl, setImgUrl] = useState("");
+  const [cat, setCat] = useState("");
+  const [btn, setBtn] = useState(true);
+  const {currentUser} = useContext(AuthContext);
+  var src;
+  if(state === null){
+    if (img != null) {
+      src = URL.createObjectURL(img);
+    }
+  } ;
+  useEffect(() => {
+    setTitle(state?.title || '');
+    setValue(state?.desc || '');
+    setImgUrl(state?.img || '');
+    setCat(state?.cat || '');
+  },[state]);
+  const handleSubmit = async (e) => {
+    setBtn(false);
+    e.preventDefault();
+    if (state === null) {
+      try {
+        const res = await newPost(
+          moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"),
+          value,
+          img,
+          title,
+          currentUser.uid,
+          cat
+        );
+        if (res) {
+          navigate("/");
+        } else {
+          setBtn(true);
+        }
+      } catch (err) {}
+    }else{
+      try{
+        const res = await editPost(
+          moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"),
+          value,
+          img != null ? await uploadImg(img, title) : imgUrl,
+          title,
+          currentUser.uid,
+          cat,
+          state.postId);
+          if (res) {
+            navigate("/");
+          } else {
+            setBtn(true);
+          }
+      }catch(err){
+        return err;
+      }
+      if ((state.title !== title) && (img !== null)) {
+        deleteImg(imgUrl);
+      }
+    }
+  };
+  const viewImg = () => {
+    if (state != null) {
+      if (img === null) {
+        return (<img src={imgUrl} alt={imgUrl} />)
+      }else{
+        src = URL.createObjectURL(img);
+        return (<img src={src} alt={src} />)
+      }
+    }else{
+      return (<img src={src} alt={src} />)
+    }
+  }
   return (
     <div className="add">
       <div className="content">
-        <input type="text" placeholder="Título" />
+        <input
+          type="text"
+          placeholder="Título"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
         <div className="editorContainer">
-          <ReactQuill className='editor' theme="snow" value={value} onChange={setValue} />
+          <ReactQuill
+            className="editor"
+            theme="snow"
+            value={value}
+            onChange={setValue}
+          />
         </div>
       </div>
       <div className="menu">
+        <div className="item">
+          {viewImg()}
+          
+        </div>
         <div className="item">
           <h1>Publicar</h1>
           <span>
@@ -20,30 +112,62 @@ const Write = () => {
           <span>
             <b>Visibilidade: </b> Publico
           </span>
-          <input style={{display: 'none'}} type="file" id='file'/>
-          <label className='file' htmlFor="file">Carregar Imagem</label>
-          <div className="buttons">
-            <button>Salvar o Rascunho</button>
-            <button>Carregar</button>
-          </div>
+          <input
+            style={{ display: "none" }}
+            type="file"
+            id="file"
+            onChange={(e) => setImg(e.target.files[0])}
+          />
+          <label className="file" htmlFor="file">
+            Carregar Imagem
+          </label>
+          {btn ? 
+            <div className="buttons">
+              <button>Salvar o Rascunho</button>
+              <button onClick={handleSubmit}>Publicar</button>
+            </div>
+            :
+            <div className="buttons">
+              <button disabled>Salvar o Rascunho</button>
+              <button disabled >Publicar</button>
+            </div>
+          }
         </div>
         <div className="item">
           <h1>Categorias</h1>
           <div className="cat">
-            <input type="radio" name='cat' value='precificacao' id='precificacao'/>
+            <input
+              type="radio" checked={cat === "precificacao"}
+              name="cat"
+              value="precificacao"
+              id="precificacao"
+              onChange={(e) => setCat(e.target.value)}
+            />
             <label htmlFor="precificacao">Precificação</label>
           </div>
           <div className="cat">
-            <input type="radio" name='cat' value='financas' id='financas'/>
+            <input
+              type="radio" checked={cat === "financas"}
+              name="cat"
+              value="financas"
+              id="financas"
+              onChange={(e) => setCat(e.target.value)}
+            />
             <label htmlFor="precificacao">Finanças</label>
           </div>
           <div className="cat">
-            <input type="radio" name='cat' value='impostos' id='impostos'/>
+            <input
+              type="radio" checked={cat === "impostos"}
+              name="cat"
+              value="impostos"
+              id="impostos"
+              onChange={(e) => setCat(e.target.value)}
+            />
             <label htmlFor="precificacao">Impostos</label>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 export default Write;

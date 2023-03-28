@@ -1,59 +1,81 @@
+import { useState, useEffect, useContext } from "react";
 import { RiEditBoxFill, RiDeleteBin7Fill } from "react-icons/ri";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Menu from "../components/Menu";
-
+import { getById, deleteInfo,deleteImg } from "../config/api";
+import moment from "moment";
+import 'moment/locale/pt';
+import { AuthContext } from "../context/authContext";
 const Simgle = () => {
+  const [post, setPost] = useState({});
+  const [userPost, setUserPost] = useState({});
+  const location = useLocation();
+  const postId = location.pathname.split("/")[2];
+  const {currentUser} = useContext(AuthContext);
+  const navigate = useNavigate();
+  useEffect(() => {
+    const fetchData = async () => {
+      let res; 
+      let user; 
+      try {
+        if (postId) {
+          res = await getById('posts',postId); 
+          user = await getById('user', res.uid);
+          if (res) {
+            setPost(res);
+            setUserPost(user);
+          }else{
+            navigate('/page-not-found');
+          }
+        }else{
+          navigate('/page-not-found');
+        }
+      } catch (err) {
+        window.location.reload(false);
+      }
+      
+    };
+    fetchData();
+  }, [postId]);
+  const handleDelete = async () => { 
+    if (deleteInfo('posts', postId)) {
+      alert("Deletado com Sucesso");
+      deleteImg(post.img);
+      navigate('/');
+    }
+  };
+  function createMarkup() {
+    return {__html: post.desc};
+  }
   return (
     <div className="single">
       <div className="content">
         <img
-          src="https://images.pexels.com/photos/6157049/pexels-photo-6157049.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+          src={post?.img}
           alt=""
         />
         <div className="user">
           <img
-            src="https://avatars.githubusercontent.com/u/52580590?s=400&u=7fb8c7bc8b28deaa78dae83dedf0503c5305035c&v=4"
+            src={userPost?.img}
             alt=""
           />
           <div className="info">
-            <span>Bruno Lemos</span>
-            <p1>Postado 2 dias atras</p1>
+            <span>{userPost?.userName}</span>
+            <p className="userName">Postado {moment(post.date).locale('pt').fromNow()}</p>
           </div>
-          <div className="edit">
-            <Link to={`/write?:edit=2`}>
-              <RiEditBoxFill className="img" />
-            </Link>
-            <RiDeleteBin7Fill className="img" />
-          </div>
+          {currentUser != null && currentUser.uid === userPost?.uid && 
+            (<div className="edit">
+              <Link to={`/write?edit=${postId}`} state={{...post,postId}}>
+                <RiEditBoxFill className="img" />
+              </Link>
+              <RiDeleteBin7Fill onClick={handleDelete} className="img" />
+            </div>)
+          }
         </div>
-        <h1>Lorem ipsum dolor sit amet consectetur adipisicing elit</h1>
-        <p>
-          <p>
-          It is a long established fact that a reader will be distracted by the
-          readable content of a page when looking at its layout. The point of
-          using Lorem Ipsum is that it has a more-or-less normal distribution of
-          letters, as opposed to using 'Content here, content here', making it
-          look like readable English. Many desktop publishing packages and web
-          page editors now use Lorem Ipsum as their default model text, and a
-          search for 'lorem ipsum' will uncover many web sites still in their
-          infancy. Various versions have evolved over the years, sometimes by
-          accident, sometimes on purpose (injected humour and the like).
-          </p>
-          
-          <p>
-          It is a long established fact that a reader will be distracted by the
-          readable content of a page when looking at its layout. The point of
-          using Lorem Ipsum is that it has a more-or-less normal distribution of
-          letters, as opposed to using 'Content here, content here', making it
-          look like readable English. Many desktop publishing packages and web
-          page editors now use Lorem Ipsum as their default model text, and a
-          search for 'lorem ipsum' will uncover many web sites still in their
-          infancy. Various versions have evolved over the years, sometimes by
-          accident, sometimes on purpose (injected humour and the like).
-          </p>
-        </p>
-      </div>
-      <Menu/>
+        <h1>{post.title}</h1>
+          <div dangerouslySetInnerHTML={createMarkup()}/>
+      </div> 
+      {post.cat && <Menu cat={post.cat}/>}
     </div>
   );
 };
