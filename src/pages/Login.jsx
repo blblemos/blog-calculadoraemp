@@ -12,6 +12,7 @@ const Login = () => {
   const [cookies, setCookie] = useCookies(['access_token']);
   const navigate = useNavigate();
   const { loginContext } = useContext(AuthContext);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setBtnValue('Aguarde...');
@@ -29,7 +30,6 @@ const Login = () => {
   };
   return (
     <div className="auth">
-      <h1>Login</h1>
       <form onSubmit={handleSubmit}>
         <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="Email" />
         <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Senha" />

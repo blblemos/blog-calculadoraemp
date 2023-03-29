@@ -54,6 +54,8 @@ const Simgle = () => {
           src={post?.img}
           alt=""
         />
+        <h1 id="title-post">{post.title}</h1>
+        <div id="content-post" dangerouslySetInnerHTML={createMarkup()}/>
         <div className="user">
           <img
             src={userPost?.img}
@@ -72,8 +74,6 @@ const Simgle = () => {
             </div>)
           }
         </div>
-        <h1>{post.title}</h1>
-          <div dangerouslySetInnerHTML={createMarkup()}/>
       </div> 
       {post.cat && <Menu cat={post.cat}/>}
     </div>

@@ -9,6 +9,7 @@ import Protected from "./components/Protected"
 import { AuthContext } from "./context/authContext";
 import "./style/style.scss"
 import { useContext } from "react"
+import { Navigate } from 'react-router-dom'
 
 function App() {
   const {currentUser} = useContext(AuthContext);
@@ -46,7 +47,7 @@ function App() {
     },
     {
       path: "/login",
-      element: <Login/>,
+      element: currentUser === null ? <Login/> : <Navigate to="/" replace />,
     }
   ]);
   return (

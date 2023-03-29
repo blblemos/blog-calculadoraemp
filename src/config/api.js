@@ -164,12 +164,11 @@ export async function newPost(date, desc, file, title, uid, cat) {
   return res;
 }
 //Editar post
-export async function editPost(date, desc, img, title, uid, cat, idPost){
+export async function editPost( desc, img, title, uid, cat, idPost){
   const userCollectionRef = doc(db, "posts", idPost);
   var res = false;
   try {
     await updateDoc(userCollectionRef, {
-      date,
       desc,
       img,
       title,

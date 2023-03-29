@@ -49,7 +49,6 @@ const Write = () => {
     }else{
       try{
         const res = await editPost(
-          moment(Date.now()).format("YYYY-MM-DD HH:mm:ss"),
           value,
           img != null ? await uploadImg(img, title) : imgUrl,
           title,
