@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {login} from "../config/api";
 import { useCookies } from 'react-cookie';
 import { AuthContext } from "../context/authContext";
+import MetaTags from "react-meta-tags";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -30,6 +31,9 @@ const Login = () => {
   };
   return (
     <div className="auth">
+      <MetaTags>
+        <title>Login</title>
+      </MetaTags>
       <form onSubmit={handleSubmit}>
         <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="Email" />
         <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Senha" />

@@ -6,6 +6,8 @@ import { getById, deleteInfo,deleteImg } from "../config/api";
 import moment from "moment";
 import 'moment/locale/pt';
 import { AuthContext } from "../context/authContext";
+import MetaTags from "react-meta-tags";
+
 const Simgle = () => {
   const [post, setPost] = useState({});
   const [userPost, setUserPost] = useState({});
@@ -47,8 +49,20 @@ const Simgle = () => {
   function createMarkup() {
     return {__html: post.desc};
   }
+  const getText = (html) =>{
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    var descricao_txt = doc.body.textContent;
+    if (descricao_txt.length > 500) {
+      descricao_txt = descricao_txt.substr(0,500)+"...";
+    }
+    return descricao_txt;
+  }
   return (
     <div className="single">
+      <MetaTags>
+        <title>{post.title}</title>
+        <meta id="meta-description" name="description" content={getText(post.desc)}/>
+      </MetaTags>
       <div className="content">
         <img
           src={post?.img}

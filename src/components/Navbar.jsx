@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Logo from "../img/logo.png";
 import { AuthContext } from "../context/authContext";
 import { useCookies } from 'react-cookie';
+
 const Navbar = () => {
   const { currentUser, logoutContext } = useContext(AuthContext);
   const [cookies, setCookie, removeCookie] = useCookies(['access_token']);

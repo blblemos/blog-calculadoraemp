@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate  } from "react-router-dom";
 import {newUser} from "../config/api";
-
+import MetaTags from "react-meta-tags";
 const Register = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -24,6 +24,9 @@ const Register = () => {
   }
   return (
     <div className="auth">
+      <MetaTags>
+        <title>Login</title>
+      </MetaTags>
       <h1>Registrar-se</h1>
       <form onSubmit={handleSubmit}>
         <input

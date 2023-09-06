@@ -5,6 +5,7 @@ import { editPost, newPost, uploadImg, deleteImg } from "../config/api";
 import "react-quill/dist/quill.snow.css";
 import { AuthContext } from "../context/authContext";
 import moment from "moment";
+import MetaTags from "react-meta-tags";
 const Write = () => {
   const state = useLocation().state;
   const navigate = useNavigate();
@@ -82,6 +83,9 @@ const Write = () => {
   }
   return (
     <div className="add">
+      <MetaTags>
+        <title>Write</title>
+      </MetaTags>
       <div className="content">
         <input
           type="text"
