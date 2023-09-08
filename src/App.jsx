@@ -6,7 +6,8 @@ import Login from "./pages/Login"
 import Simgle from "./pages/Single"
 import Write from "./pages/Write"
 import Protected from "./components/Protected"
-import { AuthContext } from "./context/authContext";
+import Calc from "./components/Calc"
+import { AuthContext } from "./context/authContext"
 import "./style/style.scss"
 import { useContext } from "react"
 import { Navigate } from 'react-router-dom'
@@ -19,6 +20,7 @@ function App() {
         <Navbar/>
         <Outlet/>
         <Footer/>
+        <Calc/>
       </>
     )
   }

@@ -16,6 +16,7 @@ const Simgle = () => {
   const {currentUser} = useContext(AuthContext);
   const navigate = useNavigate();
   useEffect(() => {
+    window.scrollTo(0, 0);
     const fetchData = async () => {
       let res; 
       let user; 
