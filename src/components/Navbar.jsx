@@ -23,11 +23,11 @@ const Navbar = () => {
           <Link className="link" to="/?precificacao">
             <h6>Precificação</h6>
           </Link>
-          <Link className="link" to="/?financas">
-            <h6>Finanças</h6>
+          <Link className="link" to="/?noticias">
+            <h6>Notícias</h6>
           </Link>
-          <Link className="link" to="/?impostos">
-            <h6>Impostos</h6>
+          <Link className="link" to="/?outros">
+            <h6>Outros</h6>
           </Link>
           <span>{currentUser?.displayName}</span>
           {currentUser && <span onClick={logout}>Logout</span>}
