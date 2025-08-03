@@ -1,25 +1,30 @@
-# Etapa 1: Build do projeto
-FROM node:16-alpine AS build
+# Etapa de build
+FROM node:16-alpine AS builder
 
 WORKDIR /app
 
+# Adiciona dependências de build para pacotes nativos
+RUN apk add --no-cache python3 make g++
+
+# Copia os arquivos de dependência
+COPY package*.json ./
+
+# Instala dependências
+RUN npm install
+
+# Copia o restante do código
 COPY . .
 
-RUN npm install --frozen-lockfile
-RUN npm build
+# Gera a build do React
+RUN npm run build
 
-# Etapa 2: Servindo os arquivos com 'serve'
-FROM node:16-alpine
+# Etapa final: nginx
+FROM nginx:alpine
 
-WORKDIR /app
+RUN rm -rf /usr/share/nginx/html/*
 
-# Instala o pacote 'serve' globalmente
-RUN npm global add serve
+COPY --from=builder /app/build /usr/share/nginx/html
 
-# Copia os arquivos buildados da etapa anterior
-COPY --from=build /app/build ./build
+EXPOSE 80
 
-EXPOSE 3000
-
-# Inicia o servidor
-CMD ["serve", "-s", "build", "-l", "3000"]
+CMD ["nginx", "-g", "daemon off;"]
