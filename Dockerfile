@@ -1,30 +1,26 @@
-# Etapa 1: Build da aplicação
+# Etapa 1: build da aplicação
 FROM node:16-alpine AS builder
 
 WORKDIR /app
 
-# Copia arquivos do projeto
 COPY package*.json ./
-COPY . .
-
-# Instala dependências e builda
 RUN npm install
+
+COPY . .
 RUN npm run build
 
-# Etapa 2: Imagem final, somente com o que precisa para rodar
-FROM node:16-alpine
+# Etapa 2: servir a aplicação com nginx
+FROM nginx:alpine
 
-WORKDIR /app
+# Remove a configuração padrão do nginx
+RUN rm -rf /usr/share/nginx/html/*
 
-# Copia os arquivos de produção
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/next.config.js ./next.config.js
+# Copia os arquivos buildados da etapa anterior
+COPY --from=builder /app/build /usr/share/nginx/html
 
-# Expõe a porta padrão do Next.js
-EXPOSE 3000
+# Copia o arquivo de configuração customizado (opcional)
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Inicia o app em modo produção
-CMD ["npm", "start"]
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
