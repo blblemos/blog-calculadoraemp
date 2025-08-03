@@ -3,22 +3,20 @@ FROM node:16-alpine AS builder
 
 WORKDIR /app
 
-# Adiciona dependências de build para pacotes nativos
+# Instala dependências de build para pacotes nativos
 RUN apk add --no-cache python3 make g++
 
-# Copia os arquivos de dependência
+# Copia arquivos de dependência
 COPY package*.json ./
 
-# Instala dependências
-RUN npm install
+# Solução do seu erro aqui 👇
+RUN npm install --legacy-peer-deps
 
-# Copia o restante do código
 COPY . .
 
-# Gera a build do React
 RUN npm run build
 
-# Etapa final: nginx
+# Etapa final para servir com nginx
 FROM nginx:alpine
 
 RUN rm -rf /usr/share/nginx/html/*
