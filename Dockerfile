@@ -1,26 +1,31 @@
-# Etapa 1: build da aplicação
+# Etapa 1: build do app com Node 16
 FROM node:16-alpine AS builder
 
 WORKDIR /app
 
-COPY package*.json ./
+# Copia os arquivos de dependências
+COPY package.json package-lock.json* ./
+
+# Instala as dependências
 RUN npm install
 
+# Copia o restante do código
 COPY . .
+
+# Gera a versão de produção
 RUN npm run build
 
-# Etapa 2: servir a aplicação com nginx
+# Etapa 2: servidor nginx para servir os arquivos
 FROM nginx:alpine
 
-# Remove a configuração padrão do nginx
+# Apaga arquivos padrão do nginx
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copia os arquivos buildados da etapa anterior
+# Copia os arquivos buildados para o nginx
 COPY --from=builder /app/build /usr/share/nginx/html
 
-# Copia o arquivo de configuração customizado (opcional)
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
-
+# Porta padrão do nginx
 EXPOSE 80
 
+# Inicia o nginx em foreground
 CMD ["nginx", "-g", "daemon off;"]
