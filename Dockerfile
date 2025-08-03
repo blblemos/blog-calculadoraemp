@@ -15,7 +15,7 @@ FROM nginx:alpine
 RUN rm -rf /usr/share/nginx/html/*
 COPY --from=builder /app/build /usr/share/nginx/html
 
-EXPOSE 80
+EXPOSE 3000
 
 # Healthcheck para evitar erro no Coolify
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
