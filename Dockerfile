@@ -1,17 +1,29 @@
-# Etapa 1: Build
-FROM node:16-alpine as builder
+# Etapa 1: Build da aplicação
+FROM node:16-alpine AS builder
 
 WORKDIR /app
+
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
+
 COPY . .
 RUN npm run build
 
-# Etapa 2: Nginx para servir arquivos estáticos
-FROM nginx:alpine
+# Etapa 2: Servir arquivos estáticos com o `serve`
+FROM node:16-alpine
 
-COPY --from=builder /app/build /usr/share/nginx/html
-COPY --from=builder /app/nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Instala o servidor estático
+RUN npm install -g serve
+
+# Copia os arquivos buildados
+COPY --from=builder /app/build ./build
+
+EXPOSE 3000
+
+# Healthcheck para o Coolify saber que o container está ok
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
+
+CMD ["serve", "-s", "build", "-l", "3000"]
