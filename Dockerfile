@@ -1,31 +1,30 @@
-# Etapa 1: build do app com Node 16
+# Etapa de build
 FROM node:16-alpine AS builder
 
 WORKDIR /app
 
-# Copia os arquivos de dependências
-COPY package.json package-lock.json* ./
+# Adiciona dependências de build para pacotes nativos
+RUN apk add --no-cache python3 make g++
 
-# Instala as dependências
+# Copia os arquivos de dependência
+COPY package*.json ./
+
+# Instala dependências
 RUN npm install
 
 # Copia o restante do código
 COPY . .
 
-# Gera a versão de produção
+# Gera a build do React
 RUN npm run build
 
-# Etapa 2: servidor nginx para servir os arquivos
+# Etapa final: nginx
 FROM nginx:alpine
 
-# Apaga arquivos padrão do nginx
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copia os arquivos buildados para o nginx
 COPY --from=builder /app/build /usr/share/nginx/html
 
-# Porta padrão do nginx
 EXPOSE 80
 
-# Inicia o nginx em foreground
 CMD ["nginx", "-g", "daemon off;"]
